@@ -4,8 +4,24 @@
 #include <stdio_ext.h>
 #include <string.h>
 
+void gera_alinhamento(Tabela tabela){
+
+}
+
+//Monta a estrutura celula
+Celula monta_celula(char *id, int tamanho, char *sequencia ){
+    Celula c;
+
+    sequencia = (char*) realloc (sequencia, tamanho);
+    c.id = id;
+    c.sequencia = sequencia;
+    c.tamanhoSequencia = tamanho;
+
+    return c;
+}
+
 // Lê o arquivo e retorna as sequencias em uma estrutura nomeada tabela
-void lerArquivo(char* nomeArquivo){
+Tabela ler_arquivo(char *nomeArquivo){
 	FILE *f;		
     Tabela tabela;
     
@@ -15,25 +31,31 @@ void lerArquivo(char* nomeArquivo){
 				 	
 	f = fopen(nomeArquivo, "r");
 	if(f == NULL){
-        printf("\nArquivo não encontrado\n");
+        printf("Arquivo não encontrado\n");
         exit(1);
     } 
 
-    fscanf(f, "%d\n", tabela.qtdSequencias);
-
+    fscanf(f, "%d\n", &tabela.qtdSequencias);
     id = (char *) malloc ((tabela.qtdSequencias + 2) * sizeof(char));
-	Celula *celulas = (Celula *) calloc(tabela.qtdSequencias, sizeof(Celula));
+	Celula *celulas = (Celula *) malloc((tabela.qtdSequencias) * sizeof(Celula));
+
 	for (int i = 0; i < tabela.qtdSequencias; i++) {
-	    fscanf(f,"%s %d %s\n", id, tamanho, sequencia);
-	    celulas[i] = lerCelula(id, tamanho, sequencia);
+	    fscanf(f,"%s %d ", id, &tamanho);
+        sequencia = (char*) malloc (tamanho *sizeof(char));
+        fscanf(f,"%s\n", sequencia);
+	    celulas[i] = monta_celula(id, tamanho, sequencia);
 	}
     tabela.celulas = celulas;
-	fclose(f);
+	
+    fclose(f);
     free(f);
+    free(sequencia);
+    free(id);
 
 	return tabela; 
 }
 
+// Imprime a matriz de alinhamento, função não é mais utilizada
 void imprime_mat(int lin, int col, int **mat){
     for(int i = 0; i < lin; i++){
         for(int j = 0; j < col; j++)
@@ -42,6 +64,7 @@ void imprime_mat(int lin, int col, int **mat){
     }
 }
 
+//Aloca a matriz de alinhamento
 int **monta_matriz(int lin, int col, int **mat){
     mat = (int **) calloc(lin, sizeof(int*));
     for(int i = 0; i < lin; i++)
@@ -49,11 +72,14 @@ int **monta_matriz(int lin, int col, int **mat){
     return mat;    
 }
 
+//Libera a memória utilizada pela matriz de alinhamento
 void libera_matriz(int lin, int col, int **mat){
     for(int i = 0; i < lin; i++)
         free(mat[i]);
     free(mat);
 }
+
+//Algoritmo "Longest Common Sequence"
 void lcs(char *str, char *str2, int lin, int col){
 
     int **pontos, **ponteiros; 

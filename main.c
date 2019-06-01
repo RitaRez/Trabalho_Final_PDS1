@@ -1,9 +1,9 @@
 #include "bioinfo.h"
 
 
-int main(int argc, char const *argv[]){
+int main(int argc, char *argv[]){
 
-    lerArquivo(argv[1]);    
+    ler_arquivo(argv[1]);    
 
     return 0;
 }
