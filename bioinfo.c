@@ -6,7 +6,7 @@
 
 //Imprime celula
 void imprime_celula(Celula c){
-    printf("id%d\n%d\n%s\n%s\n", c.id, c.semelhanca, c.alinhamento, c.sequencia);
+    printf("%d\nid%d\n%s\n%s\n", c.semelhanca, c.id, c.alinhamento, c.sequencia);
 }
 
 //Imprime tabela
