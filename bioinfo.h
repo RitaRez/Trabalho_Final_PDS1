@@ -10,7 +10,7 @@ enum direcoes {
 } dir;
 
 struct tipoCelula {
-    char *id;
+    int id;
     char *sequencia;
     char *alinhamento;
     int semelhanca;
@@ -24,9 +24,12 @@ struct tipoTabela {
 };
 typedef struct tipoTabela Tabela;
 
-Celula monta_celula(char *id, int tamanho, char *sequencia );
-Tabela ler_arquivo(char* nomeArquivo);
+void imprime_celula(Celula c);
+void imprime_tabela(Tabela tabela);
+void ordena_tabela(Celula *a, int left, int right);
 void imprime_mat(int lin, int col, int **mat);
 int **monta_matriz(int lin, int col, int **mat);
 void libera_matriz(int lin, int col, int **mat);
-void lcs(char *str, char *str2, int lin, int col);
+Tabela lcs(Tabela t, int i);
+Celula monta_celula(int id, int tamanho, char *sequencia );
+Tabela ler_arquivo(char *nomeArquivo);

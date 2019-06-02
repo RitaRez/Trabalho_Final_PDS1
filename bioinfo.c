@@ -4,55 +4,45 @@
 #include <stdio_ext.h>
 #include <string.h>
 
-void gera_alinhamento(Tabela tabela){
-
+//Imprime celula
+void imprime_celula(Celula c){
+    printf("%d\nid%d\n%s\n%s\n", c.semelhanca, c.id, c.alinhamento, c.sequencia);
 }
 
-//Monta a estrutura celula
-Celula monta_celula(char *id, int tamanho, char *sequencia ){
-    Celula c;
-
-    sequencia = (char*) realloc (sequencia, tamanho);
-    c.id = id;
-    c.sequencia = sequencia;
-    c.tamanhoSequencia = tamanho;
-
-    return c;
-}
-
-// Lê o arquivo e retorna as sequencias em uma estrutura nomeada tabela
-Tabela ler_arquivo(char *nomeArquivo){
-	FILE *f;		
-    Tabela tabela;
+//Imprime tabela
+void imprime_tabela(Tabela tabela){
+    for(int i = 0; i < tabela.qtdSequencias; i++)
+        printf("%d %s %d\n", tabela.celulas[i].id, tabela.celulas[i].sequencia,tabela.celulas[i].semelhanca);
     
-    char *id;
-    int tamanho;
-    char *sequencia;
-				 	
-	f = fopen(nomeArquivo, "r");
-	if(f == NULL){
-        printf("Arquivo não encontrado\n");
-        exit(1);
-    } 
+}
 
-    fscanf(f, "%d\n", &tabela.qtdSequencias);
-    id = (char *) malloc ((tabela.qtdSequencias + 2) * sizeof(char));
-	Celula *celulas = (Celula *) malloc((tabela.qtdSequencias) * sizeof(Celula));
-
-	for (int i = 0; i < tabela.qtdSequencias; i++) {
-	    fscanf(f,"%s %d ", id, &tamanho);
-        sequencia = (char*) malloc (tamanho *sizeof(char));
-        fscanf(f,"%s\n", sequencia);
-	    celulas[i] = monta_celula(id, tamanho, sequencia);
-	}
-    tabela.celulas = celulas;
-	
-    fclose(f);
-    free(f);
-    free(sequencia);
-    free(id);
-
-	return tabela; 
+//Deixa a tabela em ordem de maior semelhancia
+void ordena_tabela(Celula *a, int left, int right) {
+    int i, j, x;
+    Celula y;
+     
+    i = left;
+    j = right;
+    x = a[(left + right) / 2].semelhanca;
+     
+    while(i <= j) {
+        while(a[i].semelhanca < x && i < right)
+            i++;
+        while(a[j].semelhanca > x && j > left)
+            j--;
+        if(i <= j) {
+            y = a[i];
+            a[i] = a[j];
+            a[j] = y;
+            i++;
+            j--;
+        }
+    }
+     
+    if(j > left) 
+        ordena_tabela(a, left, j);
+    if(i < right) 
+        ordena_tabela(a, i, right);
 }
 
 // Imprime a matriz de alinhamento, função não é mais utilizada
@@ -80,22 +70,24 @@ void libera_matriz(int lin, int col, int **mat){
 }
 
 //Algoritmo "Longest Common Sequence"
-void lcs(char *str, char *str2, int lin, int col){
+Tabela lcs(Tabela t, int index){
 
     int **pontos, **ponteiros; 
+    int lin = t.celulas[0].tamanhoSequencia + 1;
+    int col = t.celulas[index].tamanhoSequencia + 1;
     
     pontos = monta_matriz(lin, col, pontos);   
     ponteiros = monta_matriz(lin, col, ponteiros);
     
     for(int i = 0; i < lin; i++) {
         for(int j = 0; j < col; j++) {            
-            if(i == 0 || j == 0) {
+            if(i == 0 || j == 0){
                 continue;   
-            } else if(str[i - 1] == str2[j - 1]) {
+            } else if(t.celulas[0].sequencia[i - 1] == t.celulas[index].sequencia[j - 1]){
                 pontos[i][j] = pontos[i - 1][j - 1] + 1;
                 ponteiros[i][j] = diagonal;          
             } else { 
-                if(pontos[i - 1][j] >= pontos[i][j - 1]){    
+                if(pontos[i - 1][j] >= pontos[i][j - 1]){   
                     pontos[i][j] = pontos[i - 1][j];
                     ponteiros[i][j] = vertical;
                 } else {
@@ -105,7 +97,49 @@ void lcs(char *str, char *str2, int lin, int col){
             }         
         }
     }  
-    imprime_mat(lin, col, pontos);  
-    libera_matriz(lin, col, pontos);
-    libera_matriz(lin, col, ponteiros);
+    t.celulas[index].semelhanca = pontos[lin - 1][col - 1];
+    return t;
+}
+
+
+//Monta a estrutura celula
+Celula monta_celula(int id, int tamanho, char *sequencia ){
+    Celula c;
+
+    sequencia = (char*) realloc (sequencia, tamanho);
+    c.id = id;
+    c.sequencia = sequencia;
+    c.tamanhoSequencia = tamanho;
+
+    return c;
+}
+
+// Lê o arquivo e retorna as sequencias em uma estrutura nomeada tabela
+Tabela ler_arquivo(char *nomeArquivo){
+	FILE *f;		
+    Tabela tabela;
+    
+    int id;
+    int tamanho;
+    char *sequencia;
+				 	
+	f = fopen(nomeArquivo, "r");
+	if(f == NULL){
+        printf("Arquivo não encontrado\n");
+        exit(1);
+    } 
+
+    fscanf(f, "%d\n", &tabela.qtdSequencias);
+	Celula *celulas = (Celula *) malloc((tabela.qtdSequencias) * sizeof(Celula));
+	for (int i = 0; i < tabela.qtdSequencias; i++) {
+	    fscanf(f,"id%d %d ",&id, &tamanho);
+        sequencia = (char*) malloc ((tamanho + 1) * sizeof(char));
+        fscanf(f,"%s\n", sequencia);
+	    celulas[i] = monta_celula(id, tamanho, sequencia);
+	}
+    tabela.celulas = celulas;
+	
+    fclose(f);
+    free(f);
+	return tabela; 
 }
