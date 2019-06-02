@@ -6,13 +6,13 @@
 
 //Imprime celula
 void imprime_celula(Celula c){
-    printf("%d\nid%d\n%s\n%s\n", c.semelhanca, c.id, c.alinhamento, c.sequencia);
+    printf("id%d\n%d\n%s\n%s\n", c.id, c.semelhanca, c.alinhamento, c.sequencia);
 }
 
 //Imprime tabela
 void imprime_tabela(Tabela tabela){
     for(int i = 0; i < tabela.qtdSequencias; i++)
-        printf("%d %s %d\n", tabela.celulas[i].id, tabela.celulas[i].sequencia,tabela.celulas[i].semelhanca);
+        printf("\nid%d %s %d\n", tabela.celulas[i].id, tabela.celulas[i].alinhamento, tabela.celulas[i].semelhanca);
     
 }
 
@@ -69,6 +69,37 @@ void libera_matriz(int lin, int col, int **mat){
     free(mat);
 }
 
+// Gera alinhamento de uma sequencia espeficica com a primeira sequencia
+char *gera_alinhamento(int flag, int lin, int col, int **mat, char *str){
+    
+    int i = lin, j = col, tamanho;   
+    if(!flag)
+        tamanho = lin;
+    else
+        tamanho = col;   
+    char *alinhamento = (char *) malloc (tamanho*sizeof(char));
+
+    for(int k = 0; k < tamanho - 2; k++)
+        alinhamento[k] = '_';
+    
+    while(i != 0 && j != 0 && tamanho !=0){
+        if(mat[i][j] == diagonal){
+            alinhamento[tamanho - 1] = str[tamanho - 1];
+            i--;
+            j--;
+        } else if(mat[i][j] == vertical){   
+            alinhamento[tamanho - 1] = '_';
+            i--;  
+        } else {
+            alinhamento[tamanho - 1] = '_';
+            j--;
+        }   
+        tamanho--;
+    }
+    
+    return alinhamento;
+}
+
 //Algoritmo "Longest Common Sequence"
 Tabela lcs(Tabela t, int index){
 
@@ -97,7 +128,18 @@ Tabela lcs(Tabela t, int index){
             }         
         }
     }  
+
     t.celulas[index].semelhanca = pontos[lin - 1][col - 1];
+
+    if(lin > col)
+        t.celulas[index].alinhamento = gera_alinhamento(0, lin - 1, col - 1, ponteiros, t.celulas[0].sequencia);
+    else 
+        t.celulas[index].alinhamento = gera_alinhamento(1, lin - 1, col - 1, ponteiros, t.celulas[index].sequencia);
+
+
+    libera_matriz(lin, col, pontos);
+    libera_matriz(lin, col, ponteiros);
+
     return t;
 }
 
