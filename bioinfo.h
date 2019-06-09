@@ -33,8 +33,6 @@ void libera_matriz(int lin, int col, int **mat);
 
 int **monta_matriz(int lin, int col, int **mat);
 
-char* gera_alinhamento1(int lin, int col, int **mat, char *str);
-char* gera_alinhamento2(int lin, int col, int **mat, char *str);
-
+Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *str1, char *str2);
 Tabela lcs(Tabela t, int index1);
 Tabela ler_arquivo(char *nomeArquivo);

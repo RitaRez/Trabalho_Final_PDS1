@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
     ordena_tabela(tabela.celulas, 0, tabela.qtdSequencias - 1);
 
     imprime_celula(tabela.celulas[tabela.qtdSequencias - 1]);
-    //imprime_tabela(tabela);
+    imprime_tabela(tabela);
 
     free(tabela.celulas);
 
