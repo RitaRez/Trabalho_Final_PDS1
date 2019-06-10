@@ -87,7 +87,7 @@ void libera_matriz(int lin, int col, int **mat){
 }
 
 // Gera primeiro alinhamento de uma sequencia espeficica com a primeira sequencia
-Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *str1, char *str2){
+char* gera_alinhamento1(int lin, int col, int **mat, char *str){
 
     int i = lin, j = col, tamanho = 0;
     while(i != 0 && j != 0){
@@ -104,53 +104,77 @@ Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *
     if(i == 0)
         tamanho += j;
     else
-        tamanho += i;
+        tamanho +=i;
 
-    char *alinhamento1 = (char *) malloc (tamanho*sizeof(char));
-    char *alinhamento2 = (char *) malloc (tamanho*sizeof(char));
-    while(mat[lin][col] != 0){
-        if(mat[lin][col] == horizontal){
-            alinhamento1[tamanho-1] = str1[col];
-            alinhamento2[tamanho-1] = '_';
-            col--;
-            tamanho--;
+
+    char *alinhamento = (char *) malloc (tamanho*sizeof(char));
+
+    for(int k = 0; k < tamanho - 1; k++)
+        alinhamento[k] = '_';
+
+    i = lin;
+    j = col;
+    while(i != 0 && j != 0 && col != 0){
+        if(mat[i][j] == diagonal){
+            alinhamento[tamanho - 1] = str[col - 1];
+            i--;
+            j--;
+        } else if(mat[i][j] == vertical){
+            alinhamento[tamanho - 1] = str[col - 1];
+            i--;
+        } else {
+            alinhamento[tamanho - 1] = '_';
+            j--;
         }
-        if(mat[lin][col] == diagonal){
-            alinhamento1[tamanho-1] = str1[col];
-            alinhamento2[tamanho-1] = str2[lin];
-            lin--;
-            col--;
-            tamanho--;
-        }
-        if(mat[lin][col] == vertical){
-            alinhamento1[tamanho-1] = '_';
-            alinhamento2[tamanho-1] = str2[lin];
-            lin--;
-            tamanho--;
-        }
-    }
-    while(lin > 0) {
-        alinhamento1[tamanho-1] = '_';
-        alinhamento2[tamanho-1] = str2[lin];
-        tamanho--;
-        lin--;
-    }
-    while(col > 0) {
-        alinhamento1[tamanho-1] = str1[col];
-        alinhamento2[tamanho-1] = '_';
-        tamanho--;
         col--;
+        tamanho--;
     }
+    return alinhamento;
+}
 
-    if(index == 2){
-        printf("%s \n%s", alinhamento1, alinhamento2);
-        printf("\n%d %d %d", col, lin, tamanho);
+
+// Gera segundo alinhamento de uma sequencia espeficica com a primeira sequencia
+char* gera_alinhamento2(int lin, int col, int **mat, char *str){
+
+    int i = lin, j = col, tamanho = 0;
+    while(i != 0 && j != 0){
+        if(mat[i][j] == diagonal){
+            i--;
+            j--;
+        } else if(mat[i][j] == vertical){
+            i--;
+        } else {
+            j--;
+        }
+        tamanho++;
     }
+    if(i == 0)
+        tamanho += j;
+    else
+        tamanho +=i;
+    char *alinhamento = (char *) malloc (tamanho*sizeof(char));
 
-    t.celulas[index].alinhamento1 = alinhamento1;
-    t.celulas[index].alinhamento2 = alinhamento2;
+    for(int k = 0; k < tamanho - 1; k++)
+        alinhamento[k] = '_';
 
-    return t;
+    i = lin;
+    j = col;
+    while(i >= 0 && j >= 0 && col != 0){
+        if(mat[i][j] == diagonal){
+            alinhamento[tamanho - 1] = str[col - 1];
+            i--;
+            j--;
+        } else if(mat[i][j] == vertical){
+            alinhamento[tamanho - 1] = '_';
+            i--;
+        } else {
+            alinhamento[tamanho - 1] = str[col - 1];
+            j--;
+        }
+        col--;
+        tamanho--;
+    }
+    return alinhamento;
 }
 
 //Algoritmo "Longest Common Sequence"
@@ -164,19 +188,14 @@ Tabela lcs(Tabela t, int index){
 
     pontos = monta_matriz(lin, col, pontos);
     ponteiros = monta_matriz(lin, col, ponteiros);
+    ponteiros = seta_matriz(lin, col, ponteiros);
 
     for(int i = 1; i < lin; i++) {
         for(int j = 1; j < col; j++) {
             if(t.celulas[0].sequencia[i - 1] == t.celulas[index].sequencia[j - 1]){
                 pontos[i][j] = pontos[i - 1][j - 1] + 1;
-                if(pontos[i-1][j-1] >= pontos[i][j-1] && pontos[i-1][j-1] >= pontos[i-1][j])
-                    ponteiros[i][j] = diagonal;
-                else if(pontos[i-1][j] > pontos[i][j-1] && pontos[i-1][j] > pontos[i-1][j-1])
-                    ponteiros[i][j] = horizontal;
-                else if(pontos[i][j-1] >= pontos[i-1][j] && pontos[i][j-1] >= pontos[i-1][j-1])
-                    ponteiros[i][j] = vertical;
-
-            } else if(pontos[i - 1][j] >= pontos[i][j - 1] && pontos[i-1][j] > pontos[i-1][j-1]){
+                ponteiros[i][j] = diagonal;
+            } else if(pontos[i - 1][j] >= pontos[i][j - 1]){
                     pontos[i][j] = pontos[i - 1][j];
                     ponteiros[i][j] = vertical;
             } else {
@@ -186,11 +205,12 @@ Tabela lcs(Tabela t, int index){
         }
     }
 
-    printf("\nID%d\n", index);
-    //imprime_mat(lin, col, ponteiros);
+    // printf("\n%d\n", index);
+    // imprime_mat(lin, col, ponteiros);
 
     t.celulas[index].semelhanca = pontos[lin - 1][col - 1];
-    t = gera_alinhamento(t, index, lin - 1, col - 1, ponteiros, t.celulas[0].sequencia, t.celulas[index].sequencia);
+    t.celulas[index].alinhamento1 = gera_alinhamento1(lin - 1, col - 1, ponteiros, t.celulas[index].sequencia);
+    t.celulas[index].alinhamento2 = gera_alinhamento2(lin - 1, col - 1, ponteiros, t.celulas[index].sequencia);
 
     libera_matriz(lin, col, pontos);
     libera_matriz(lin, col, ponteiros);
