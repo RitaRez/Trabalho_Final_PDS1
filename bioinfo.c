@@ -108,43 +108,68 @@ Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *
 
     char *alinhamento1 = (char *) malloc (tamanho*sizeof(char));
     char *alinhamento2 = (char *) malloc (tamanho*sizeof(char));
+    if(index == 2){
+        printf("DNA1: %s\n", str1);
+        printf("DNA2: %s\n", str2);
+    }
     while(mat[lin][col] != 0){
         if(mat[lin][col] == horizontal){
-            alinhamento1[tamanho-1] = str1[col];
-            alinhamento2[tamanho-1] = '_';
+            if(index == 2){
+              printf("\n[lin: %d, col: %d] Horizontal\n", lin, col);
+            }
+            alinhamento1[tamanho-1] = '_';
+            alinhamento2[tamanho-1] = str2[col-1];
+            if(index == 2){
+              printf("Alinhamento 1 recebe _\n");
+              printf("Alinhamento 2 recebe %c (DNA2[%d])\n", str2[col-1], col-1);
+            }
             col--;
             tamanho--;
         }
         if(mat[lin][col] == diagonal){
-            alinhamento1[tamanho-1] = str1[col];
-            alinhamento2[tamanho-1] = str2[lin];
+            if(index == 2){
+              printf("\n[lin: %d, col: %d] Diagonal\n", lin, col);
+            }
+            alinhamento1[tamanho-1] = str1[lin-1];
+            alinhamento2[tamanho-1] = str2[col-1];
+            if(index == 2){
+              printf("Alinhamento 1 recebe %c (DNA1[%d])\n", str1[lin-1], lin-1);
+              printf("Alinhamento 2 recebe %c (DNA2[%d])\n", str2[col-1], col-1);
+            }
             lin--;
             col--;
             tamanho--;
         }
         if(mat[lin][col] == vertical){
-            alinhamento1[tamanho-1] = '_';
-            alinhamento2[tamanho-1] = str2[lin];
+            if(index == 2){
+              printf("\n[lin: %d, col: %d] Vertical\n", lin, col);
+            }
+            alinhamento1[tamanho-1] = str1[lin-1];
+            alinhamento2[tamanho-1] = '_';
+            if(index == 2){
+              printf("Alinhamento 1 recebe %c (DNA1[%d])\n", str1[lin-1], lin-1);
+              printf("Alinhamento 2 recebe _\n");
+            }
             lin--;
             tamanho--;
         }
     }
+    if(index == 2){
+      printf("\nTamanho: %d\n", tamanho);
+      printf("Col: %d\n", col);
+      printf("Lin: %d\n", lin);
+    }
     while(lin > 0) {
-        alinhamento1[tamanho-1] = '_';
-        alinhamento2[tamanho-1] = str2[lin];
+        alinhamento1[tamanho-1] = str1[lin-1];
+        alinhamento2[tamanho-1] = '_';
         tamanho--;
         lin--;
     }
     while(col > 0) {
-        alinhamento1[tamanho-1] = str1[col];
-        alinhamento2[tamanho-1] = '_';
+        alinhamento1[tamanho-1] = '_';
+        alinhamento2[tamanho-1] = str2[col-1];
         tamanho--;
         col--;
-    }
-
-    if(index == 2){
-        printf("%s \n%s", alinhamento1, alinhamento2);
-        printf("\n%d %d %d", col, lin, tamanho);
     }
 
     t.celulas[index].alinhamento1 = alinhamento1;
@@ -186,8 +211,10 @@ Tabela lcs(Tabela t, int index){
         }
     }
 
-    printf("\nID%d\n", index);
-    //imprime_mat(lin, col, ponteiros);
+    // printf("\nID%d\n", index);
+    if(index == 2){
+      imprime_mat(lin, col, ponteiros);
+    }
 
     t.celulas[index].semelhanca = pontos[lin - 1][col - 1];
     t = gera_alinhamento(t, index, lin - 1, col - 1, ponteiros, t.celulas[0].sequencia, t.celulas[index].sequencia);
