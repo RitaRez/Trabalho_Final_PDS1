@@ -24,15 +24,15 @@ void imprime_tabela(Tabela t){
 void ordena_tabela(Celula *a, int left, int right) {
     int i, j, x;
     Celula y;
-     
+
     i = left;
     j = right;
     x = a[(left + right) / 2].semelhanca;
-     
+
     while(i <= j) {
-        while(a[i].semelhanca < x && i < right)
+        while(a[i].semelhanca > x && i < right)
             i++;
-        while(a[j].semelhanca > x && j > left)
+        while(a[j].semelhanca < x && j > left)
             j--;
         if(i <= j) {
             y = a[i];
@@ -42,10 +42,10 @@ void ordena_tabela(Celula *a, int left, int right) {
             j--;
         }
     }
-     
-    if(j > left) 
+
+    if(j > left)
         ordena_tabela(a, left, j);
-    if(i < right) 
+    if(i < right)
         ordena_tabela(a, i, right);
 }
 
@@ -55,12 +55,12 @@ void imprime_mat(int lin, int col, int **mat){
         for(int j = 0; j < col; j++){
             if(mat[i][j] == 1)
                 printf("\\ ");
-            if(mat[i][j] == 2) 
+            if(mat[i][j] == 2)
                 printf("- ");
-            if(mat[i][j] == 3) 
-                printf("| ");    
+            if(mat[i][j] == 3)
+                printf("| ");
         }
-        printf("\n"); 
+        printf("\n");
     }
 }
 
@@ -68,15 +68,15 @@ void imprime_mat(int lin, int col, int **mat){
 int **monta_matriz(int lin, int col, int **mat){
     mat = (int **) calloc(lin, sizeof(int*));
     for(int i = 0; i < lin; i++)
-        mat[i] = (int *) calloc(col, sizeof(int)); 
-    return mat;    
+        mat[i] = (int *) calloc(col, sizeof(int));
+    return mat;
 }
 
 int **seta_matriz(int lin, int col, int **mat){
     for(int i = 0; i < lin; i++)
         for(int j = 0; j < col; j++)
-            mat[i][j] = horizontal;   
-    return mat;    
+            mat[i][j] = horizontal;
+    return mat;
 }
 
 //Libera a memória utilizada pela matriz de alinhamento
@@ -88,22 +88,22 @@ void libera_matriz(int lin, int col, int **mat){
 
 // Gera primeiro alinhamento de uma sequencia espeficica com a primeira sequencia
 Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *str1, char *str2){
-    
+
     int i = lin, j = col, tamanho = 0;
     while(i != 0 && j != 0){
         if(mat[i][j] == diagonal){
             i--;
             j--;
-        } else if(mat[i][j] == vertical){   
-            i--;  
+        } else if(mat[i][j] == vertical){
+            i--;
         } else {
             j--;
-        }   
+        }
         tamanho++;
     }
     if(i == 0)
         tamanho += j;
-    else 
+    else
         tamanho += i;
 
     char *alinhamento1 = (char *) malloc (tamanho*sizeof(char));
@@ -112,36 +112,36 @@ Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *
         if(mat[lin][col] == horizontal){
             alinhamento1[tamanho-1] = str1[col];
             alinhamento2[tamanho-1] = '_';
-            col--; 
+            col--;
             tamanho--;
         }
         if(mat[lin][col] == diagonal){
             alinhamento1[tamanho-1] = str1[col];
             alinhamento2[tamanho-1] = str2[lin];
-            lin--; 
-            col--; 
+            lin--;
+            col--;
             tamanho--;
         }
         if(mat[lin][col] == vertical){
             alinhamento1[tamanho-1] = '_';
             alinhamento2[tamanho-1] = str2[lin];
-            lin--; 
+            lin--;
             tamanho--;
         }
     }
-    while(lin > 0) { 
-        alinhamento1[tamanho-1] = '_'; 
-        alinhamento2[tamanho-1] = str2[lin]; 
-        tamanho--; 
-        lin--; 
-    }
-    while(col > 0) { 
-        alinhamento1[tamanho-1] = str1[col]; 
-        alinhamento2[tamanho-1] = '_'; 
+    while(lin > 0) {
+        alinhamento1[tamanho-1] = '_';
+        alinhamento2[tamanho-1] = str2[lin];
         tamanho--;
-        col--; 
+        lin--;
     }
-    
+    while(col > 0) {
+        alinhamento1[tamanho-1] = str1[col];
+        alinhamento2[tamanho-1] = '_';
+        tamanho--;
+        col--;
+    }
+
     if(index == 2){
         printf("%s \n%s", alinhamento1, alinhamento2);
         printf("\n%d %d %d", col, lin, tamanho);
@@ -149,24 +149,24 @@ Tabela gera_alinhamento(Tabela t, int index, int lin, int col, int **mat, char *
 
     t.celulas[index].alinhamento1 = alinhamento1;
     t.celulas[index].alinhamento2 = alinhamento2;
-    
+
     return t;
 }
 
 //Algoritmo "Longest Common Sequence"
 Tabela lcs(Tabela t, int index){
 
-    int **pontos, **ponteiros; 
+    int **pontos, **ponteiros;
     int lin = t.celulas[0].tamanhoSequencia + 1;
     int col = t.celulas[index].tamanhoSequencia + 1;
-    int *str_aux1 = (int*)calloc((lin - 1),sizeof(int)); 
-    int *str_aux2 = (int*)calloc((col - 1),sizeof(int)); 
+    int *str_aux1 = (int*)calloc((lin - 1),sizeof(int));
+    int *str_aux2 = (int*)calloc((col - 1),sizeof(int));
 
-    pontos = monta_matriz(lin, col, pontos);   
+    pontos = monta_matriz(lin, col, pontos);
     ponteiros = monta_matriz(lin, col, ponteiros);
-    
+
     for(int i = 1; i < lin; i++) {
-        for(int j = 1; j < col; j++) {             
+        for(int j = 1; j < col; j++) {
             if(t.celulas[0].sequencia[i - 1] == t.celulas[index].sequencia[j - 1]){
                 pontos[i][j] = pontos[i - 1][j - 1] + 1;
                 if(pontos[i-1][j-1] >= pontos[i][j-1] && pontos[i-1][j-1] >= pontos[i-1][j])
@@ -174,24 +174,24 @@ Tabela lcs(Tabela t, int index){
                 else if(pontos[i-1][j] > pontos[i][j-1] && pontos[i-1][j] > pontos[i-1][j-1])
                     ponteiros[i][j] = horizontal;
                 else if(pontos[i][j-1] >= pontos[i-1][j] && pontos[i][j-1] >= pontos[i-1][j-1])
-                    ponteiros[i][j] = vertical;      
-            
-            } else if(pontos[i - 1][j] >= pontos[i][j - 1] && pontos[i-1][j] > pontos[i-1][j-1]){   
+                    ponteiros[i][j] = vertical;
+
+            } else if(pontos[i - 1][j] >= pontos[i][j - 1] && pontos[i-1][j] > pontos[i-1][j-1]){
                     pontos[i][j] = pontos[i - 1][j];
                     ponteiros[i][j] = vertical;
             } else {
                 pontos[i][j] = pontos[i][j - 1];
                 ponteiros[i][j] = horizontal;
-            }         
+            }
         }
-    }  
-    
+    }
+
     printf("\nID%d\n", index);
     //imprime_mat(lin, col, ponteiros);
 
     t.celulas[index].semelhanca = pontos[lin - 1][col - 1];
     t = gera_alinhamento(t, index, lin - 1, col - 1, ponteiros, t.celulas[0].sequencia, t.celulas[index].sequencia);
-    
+
     libera_matriz(lin, col, pontos);
     libera_matriz(lin, col, ponteiros);
 
@@ -212,18 +212,18 @@ Celula monta_celula(int id, int tamanho, char *sequencia ){
 
 // Lê o arquivo e retorna as sequencias em uma estrutura nomeada tabela
 Tabela ler_arquivo(char *nomeArquivo){
-	FILE *f;		
+	FILE *f;
     Tabela tabela;
-    
+
     int id;
     int tamanho;
     char *sequencia;
-				 	
+
 	f = fopen(nomeArquivo, "r");
 	if(f == NULL){
         printf("Arquivo não encontrado\n");
         exit(1);
-    } 
+    }
 
     fscanf(f, "%d\n", &tabela.qtdSequencias);
 	Celula *celulas = (Celula *) malloc((tabela.qtdSequencias) * sizeof(Celula));
@@ -234,8 +234,8 @@ Tabela ler_arquivo(char *nomeArquivo){
 	    celulas[i] = monta_celula(id, tamanho, sequencia);
 	}
     tabela.celulas = celulas;
-	
+
     fclose(f);
     free(f);
-	return tabela; 
+	return tabela;
 }
